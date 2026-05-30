@@ -1,0 +1,31 @@
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+[browser] Error saving audit: {
+  code: [32m'42501'[39m,
+  details: [1mnull[22m,
+  hint: [32m'Grant the required privileges to the current role with: GRANT INSERT ON public.creator_audits TO authenticated;'[39m,
+  message: [32m'permission denied for table creator_audits'[39m
+} 
+    at handleSubmit (src/app/onboarding/page.tsx:91:13)
+  89 |     router.push('/thank-you')
+  90 |   } catch (err) {
+> 91 |     console.error('Error saving audit:', err)
+     |             ^
+  92 |     alert('Kuch problem ho gayi, dobara try karo.')
+  93 |   }
+  94 | } (src/app/onboarding/page.tsx:91:13)
+[browser] Error saving audit: {
+  code: [32m'42501'[39m,
+  details: [1mnull[22m,
+  hint: [32m'Grant the required privileges to the current role with: GRANT INSERT ON public.creator_audits TO authenticated;'[39m,
+  message: [32m'permission denied for table creator_audits'[39m
+} 
+    at handleSubmit (src/app/onboarding/page.tsx:91:13)
+  89 |     router.push('/thank-you')
+  90 |   } catch (err) {
+> 91 |     console.error('Error saving audit:', err)
+     |             ^
+  92 |     alert('Kuch problem ho gayi, dobara try karo.')
+  93 |   }
+  94 | } (src/app/onboarding/page.tsx:91:13)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior

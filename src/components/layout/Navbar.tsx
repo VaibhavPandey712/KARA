@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 const NAV_LINKS = [
   { label: 'Home',         href: '#home' },
@@ -26,6 +28,7 @@ function KaraLogo({ size = 32, color = '#192837' }: { size?: number; color?: str
 }
 
 export default function Navbar() {
+   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -39,6 +42,15 @@ export default function Navbar() {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
+
+  const handleAuthClick = async () => {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (session) {
+    router.push('/onboarding')
+  } else {
+    router.push('/auth')
+  }
+}
 
   const handleNavClick = (href: string) => {
     setMenuOpen(false)
@@ -78,13 +90,12 @@ export default function Navbar() {
 
           {/* Desktop CTA buttons */}
           <div className="navbar__actions">
-            <a
-              href="#contact"
-              className="navbar__btn-primary"
-              onClick={(e) => { e.preventDefault(); handleNavClick('#contact') }}
-            >
-              Get Free Analysis
-            </a>
+          <button
+  className="navbar__btn-primary"
+  onClick={handleAuthClick}
+>
+  Get Free Audit
+</button>
             <a
               href="#contact"
               className="navbar__btn-secondary"
@@ -154,13 +165,12 @@ export default function Navbar() {
               </nav>
 
               <div className="mobile-sheet__actions">
-                <a
-                  href="#contact"
-                  className="mobile-sheet__btn-primary"
-                  onClick={(e) => { e.preventDefault(); handleNavClick('#contact') }}
-                >
-                  Get Free Analysis
-                </a>
+             <button
+  className="mobile-sheet__btn-primary"
+  onClick={handleAuthClick}
+>
+  Get Free Audit
+</button>
                 <a
                   href="#contact"
                   className="mobile-sheet__btn-secondary"

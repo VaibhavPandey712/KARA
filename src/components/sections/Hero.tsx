@@ -3,6 +3,8 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Zap, Sparkles, Bot, ArrowRightCircle } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -18,9 +20,15 @@ const fadeUp = {
 }
 
 export default function Hero() {
-  const scrollTo = (href: string) => {
-    const el = document.querySelector(href)
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  const router = useRouter()
+
+  const handleAuditClick = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session) {
+      router.push('/onboarding')
+    } else {
+      router.push('/auth')
+    }
   }
 
   return (
@@ -73,7 +81,7 @@ export default function Hero() {
             initial="hidden"
             animate="visible"
             custom={2}
-            onClick={() => scrollTo('#contact')}
+            onClick={handleAuditClick}
             whileHover={{ scale: 1.04, filter: 'brightness(1.1)' }}
             whileTap={{ scale: 0.96 }}
           >
