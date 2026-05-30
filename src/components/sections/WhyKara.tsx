@@ -1,6 +1,8 @@
-import React from 'react';
-import { useScrollAnimation } from '../../hooks/useScrollAnimation';
-import './WhyKara.css';
+'use client'
+
+import React from 'react'
+import { motion } from 'framer-motion'
+import { X as XIcon, Check } from 'lucide-react'
 
 const TRADITIONAL = [
   'Hire multiple people separately',
@@ -9,7 +11,7 @@ const TRADITIONAL = [
   'Spend hours checking raw analytics',
   'Guess what content to create next',
   'High costs, slow delivery, hard to scale',
-];
+]
 
 const KARA_WAY = [
   'One AI-assisted content team',
@@ -18,32 +20,39 @@ const KARA_WAY = [
   'Data-backed content decisions',
   'Clear weekly strategy and content plan',
   'More time, less cost, and faster growth',
-];
+]
 
 export default function WhyKara() {
-  const { ref, isVisible } = useScrollAnimation();
-
   return (
-    <section className="section why-kara" id="why-kara" ref={ref}>
+    <section className="section why-kara" id="why-kara">
       <div className="container">
-        <div className={`why-kara__header ${isVisible ? 'why-kara__header--visible' : ''}`}>
+        <motion.div
+          className="why-kara__header"
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
           <span className="section-label">Why KARA</span>
           <h2 className="section-title">Why KARA Is Different</h2>
           <p className="section-subtitle">
             Most creators either do everything themselves or struggle to manage
             a growing team. KARA is a smarter third path.
           </p>
-        </div>
+        </motion.div>
 
-        <div className={`why-kara__grid ${isVisible ? 'why-kara__grid--visible' : ''}`}>
+        <div className="why-kara__grid">
           {/* Traditional */}
-          <div className="comparison-card comparison-card--old">
+          <motion.div
+            className="comparison-card"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="comparison-card__header">
               <div className="comparison-card__badge comparison-card__badge--old">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
+                <XIcon size={14} strokeWidth={2.5} />
                 Traditional Way
               </div>
               <h3 className="comparison-card__title">Managing It Yourself</h3>
@@ -52,16 +61,13 @@ export default function WhyKara() {
               {TRADITIONAL.map(item => (
                 <li key={item} className="comparison-card__item comparison-card__item--old">
                   <span className="comparison-card__icon comparison-card__icon--old">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"/>
-                      <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
+                    <XIcon size={11} strokeWidth={3} />
                   </span>
                   {item}
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
 
           {/* VS divider */}
           <div className="comparison-vs" aria-hidden="true">
@@ -71,13 +77,17 @@ export default function WhyKara() {
           </div>
 
           {/* KARA way */}
-          <div className="comparison-card comparison-card--kara">
+          <motion.div
+            className="comparison-card"
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="comparison-card__glow" aria-hidden="true" />
             <div className="comparison-card__header">
               <div className="comparison-card__badge comparison-card__badge--kara">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
+                <Check size={14} strokeWidth={2.5} />
                 The KARA Way
               </div>
               <h3 className="comparison-card__title">Powered by KARA</h3>
@@ -86,19 +96,23 @@ export default function WhyKara() {
               {KARA_WAY.map(item => (
                 <li key={item} className="comparison-card__item comparison-card__item--kara">
                   <span className="comparison-card__icon comparison-card__icon--kara">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
+                    <Check size={11} strokeWidth={3} />
                   </span>
                   {item}
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         </div>
 
         {/* Mission statement */}
-        <div className={`why-kara__statement ${isVisible ? 'why-kara__statement--visible' : ''}`}>
+        <motion.div
+          className="why-kara__statement"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           <div className="why-kara__statement-inner">
             <p className="why-kara__statement-kicker">Our mission</p>
             <p className="why-kara__statement-text">
@@ -106,8 +120,8 @@ export default function WhyKara() {
               <span className="why-kara__highlight">operating system for the creator economy.</span>
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
-  );
+  )
 }
