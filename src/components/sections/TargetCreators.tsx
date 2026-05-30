@@ -88,7 +88,7 @@ export default function TargetCreators() {
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <span className="section-label">Who It's For</span>
+            <span className="section-label">Who It&apos;s For</span>
             <h2 className="section-title">Built for Modern Creators</h2>
             <p className="section-subtitle">
               KARA is especially powerful for creators who already have content but
