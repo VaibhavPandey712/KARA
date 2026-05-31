@@ -3,7 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { Zap, Sparkles, Bot, ArrowRightCircle } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { handleAuditClick as goToAudit } from '@/lib/onboarding'
 import { useRouter } from 'next/navigation'
 
 const fadeUp = {
@@ -22,14 +22,7 @@ const fadeUp = {
 export default function Hero() {
   const router = useRouter()
 
-  const handleAuditClick = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) {
-      router.push('/onboarding')
-    } else {
-      router.push('/auth')
-    }
-  }
+  const handleAuditClick = () => goToAudit(router)
 
   return (
     <div className="hero" id="home">

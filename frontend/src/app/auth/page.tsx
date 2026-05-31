@@ -1,16 +1,37 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { checkOnboardingStatus } from '@/lib/onboarding'
 import { useRouter } from 'next/navigation'
 
 export default function AuthPage() {
   const router = useRouter()
+  const [checking, setChecking] = useState(true)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.push('/onboarding')
-    })
+    let cancelled = false
+
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (cancelled) return
+
+      if (!session?.user) {
+        setChecking(false)
+        return
+      }
+
+      try {
+        const { hasAudit } = await checkOnboardingStatus(session.user)
+        if (cancelled) return
+        router.replace(hasAudit ? '/plans' : '/onboarding')
+      } catch {
+        if (!cancelled) router.replace('/onboarding')
+      }
+    }
+
+    checkSession()
+    return () => { cancelled = true }
   }, [router])
 
   const handleGoogleLogin = async () => {
@@ -21,16 +42,25 @@ export default function AuthPage() {
       },
     })
   }
+
   function KaraLogo({ size = 32, color = '#192837' }: { size?: number; color?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="none" overflow="visible" viewBox="0 0 256 256">
-      <path
-        d="M 64 128 L 64.5 128 L 32 95 L 0 64 L 0 0 L 64 0 L 128 64 L 128 64.5 L 161 32 L 192 0 L 256 0 L 256 64 L 192 128 L 128 128 L 128 192 L 96 223 L 63.5 256 L 0 256 L 0 192 Z M 256 192 L 224 223 L 191.5 256 L 128 256 L 128 192 L 192 128 L 256 128 Z"
-        fill={color}
-      />
-    </svg>
-  )
-}
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="none" overflow="visible" viewBox="0 0 256 256">
+        <path
+          d="M 64 128 L 64.5 128 L 32 95 L 0 64 L 0 0 L 64 0 L 128 64 L 128 64.5 L 161 32 L 192 0 L 256 0 L 256 64 L 192 128 L 128 128 L 128 192 L 96 223 L 63.5 256 L 0 256 L 0 192 Z M 256 192 L 224 223 L 191.5 256 L 128 256 L 128 192 L 192 128 L 256 128 Z"
+          fill={color}
+        />
+      </svg>
+    )
+  }
+
+  if (checking) {
+    return (
+      <div className="auth-page">
+        <div style={{ color: 'var(--color-ink-3)', fontSize: '14px' }}>Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="auth-page">

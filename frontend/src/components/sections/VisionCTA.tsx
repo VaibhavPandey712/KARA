@@ -4,7 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { CalendarDays } from 'lucide-react'
 
-import { supabase } from '@/lib/supabase'
+import { handleAuditClick as goToAudit } from '@/lib/onboarding'
 import { useRouter } from 'next/navigation'
 function KaraLogo({ size = 32, color = '#192837' }: { size?: number; color?: string }) {
   return (
@@ -77,14 +77,7 @@ export function Vision() {
 export function CTA() {
   const router = useRouter()
 
-  const handleAuditClick = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) {
-      router.push('/onboarding')
-    } else {
-      router.push('/auth')
-    }
-  }
+  const handleAuditClick = () => goToAudit(router)
 
   return (
     <section className="section cta" id="contact">
