@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { checkOnboardingStatus } from '@/lib/onboarding'
+import { getSiteUrl } from '@/lib/config'
 import { useRouter } from 'next/navigation'
 
 export default function AuthPage() {
@@ -35,10 +36,11 @@ export default function AuthPage() {
   }, [router])
 
   const handleGoogleLogin = async () => {
+    const siteUrl = getSiteUrl()
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${siteUrl}/auth/callback`,
       },
     })
   }

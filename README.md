@@ -127,9 +127,11 @@ git push -u origin main
 
 ## Deployment notes
 
-- **Frontend**: Vercel / Netlify — set env vars from `frontend/.env.example`.
-- **Backend**: Railway, Render, Fly.io — set `FRONTEND_URL` to your production frontend URL for CORS.
-- Update `NEXT_PUBLIC_API_URL` in production to your hosted API URL.
+See **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for fixing localhost redirects after sign-in.
+
+- **Frontend**: Vercel / Netlify — set env vars from `frontend/.env.example` (`NEXT_PUBLIC_SITE_URL`, `BACKEND_URL`).
+- **Backend**: Railway, Render, Fly.io — set `FRONTEND_URL` to your production frontend URL (CORS).
+- **Supabase**: Set Site URL and redirect URLs to your production domain (not localhost).
 
 ## License
 

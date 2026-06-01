@@ -6,9 +6,24 @@ import { validateEnv } from './lib/supabase'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 4000
-const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000'
 
-app.use(cors({ origin: FRONTEND_URL, credentials: true }))
+const allowedOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:3000')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean)
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin ?? allowedOrigins[0])
+        return
+      }
+      callback(null, false)
+    },
+    credentials: true,
+  })
+)
 app.use(express.json())
 
 app.get('/health', (_req, res) => {
@@ -25,7 +40,8 @@ try {
 }
 
 const server = app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`)
+  console.log(`Backend running on port ${PORT}`)
+  console.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`)
 })
 
 server.on('error', (err: NodeJS.ErrnoException) => {

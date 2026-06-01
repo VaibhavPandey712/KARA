@@ -1,6 +1,5 @@
+import { apiUrl } from './config'
 import { supabase } from './supabase'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
 
 async function getAuthHeaders(): Promise<HeadersInit> {
   const { data: { session } } = await supabase.auth.getSession()
@@ -15,7 +14,7 @@ async function getAuthHeaders(): Promise<HeadersInit> {
 
 export async function getOnboardingStatus() {
   const headers = await getAuthHeaders()
-  const res = await fetch(`${API_URL}/api/onboarding/status`, { headers })
+  const res = await fetch(apiUrl('/api/onboarding/status'), { headers })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw new Error(body.error ?? 'Failed to fetch onboarding status')
@@ -40,7 +39,7 @@ export async function submitOnboarding(data: {
   liConnected: boolean
 }) {
   const headers = await getAuthHeaders()
-  const res = await fetch(`${API_URL}/api/onboarding/submit`, {
+  const res = await fetch(apiUrl('/api/onboarding/submit'), {
     method: 'POST',
     headers,
     body: JSON.stringify(data),

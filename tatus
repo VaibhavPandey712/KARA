@@ -1,0 +1,176 @@
+[1mdiff --git a/README.md b/README.md[m
+[1mindex ccdbde8..df0e328 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -127,9 +127,11 @@[m [mgit push -u origin main[m
+ [m
+ ## Deployment notes[m
+ [m
+[31m-- **Frontend**: Vercel / Netlify — set env vars from `frontend/.env.example`.[m
+[31m-- **Backend**: Railway, Render, Fly.io — set `FRONTEND_URL` to your production frontend URL for CORS.[m
+[31m-- Update `NEXT_PUBLIC_API_URL` in production to your hosted API URL.[m
+[32m+[m[32mSee **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** for fixing localhost redirects after sign-in.[m
+[32m+[m
+[32m+[m[32m- **Frontend**: Vercel / Netlify — set env vars from `frontend/.env.example` (`NEXT_PUBLIC_SITE_URL`, `BACKEND_URL`).[m
+[32m+[m[32m- **Backend**: Railway, Render, Fly.io — set `FRONTEND_URL` to your production frontend URL (CORS).[m
+[32m+[m[32m- **Supabase**: Set Site URL and redirect URLs to your production domain (not localhost).[m
+ [m
+ ## License[m
+ [m
+[1mdiff --git a/backend/.env.example b/backend/.env.example[m
+[1mindex dcd4428..bf8a7f6 100644[m
+[1m--- a/backend/.env.example[m
+[1m+++ b/backend/.env.example[m
+[36m@@ -1,4 +1,5 @@[m
+ PORT=4000[m
+[32m+[m[32m# Comma-separated list of allowed frontend origins (production + local)[m
+ FRONTEND_URL=http://localhost:3000[m
+ [m
+ SUPABASE_URL=[m
+[1mdiff --git a/backend/src/index.ts b/backend/src/index.ts[m
+[1mindex 361a5af..fc24df2 100644[m
+[1m--- a/backend/src/index.ts[m
+[1m+++ b/backend/src/index.ts[m
+[36m@@ -6,9 +6,24 @@[m [mimport { validateEnv } from './lib/supabase'[m
+ [m
+ const app = express()[m
+ const PORT = Number(process.env.PORT) || 4000[m
+[31m-const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000'[m
+ [m
+[31m-app.use(cors({ origin: FRONTEND_URL, credentials: true }))[m
+[32m+[m[32mconst allowedOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:3000')[m
+[32m+[m[32m  .split(',')[m
+[32m+[m[32m  .map((o) => o.trim())[m
+[32m+[m[32m  .filter(Boolean)[m
+[32m+[m
+[32m+[m[32mapp.use([m
+[32m+[m[32m  cors({[m
+[32m+[m[32m    origin(origin, callback) {[m
+[32m+[m[32m      if (!origin || allowedOrigins.includes(origin)) {[m
+[32m+[m[32m        callback(null, origin ?? allowedOrigins[0])[m
+[32m+[m[32m        return[m
+[32m+[m[32m      }[m
+[32m+[m[32m      callback(null, false)[m
+[32m+[m[32m    },[m
+[32m+[m[32m    credentials: true,[m
+[32m+[m[32m  })[m
+[32m+[m[32m)[m
+ app.use(express.json())[m
+ [m
+ app.get('/health', (_req, res) => {[m
+[36m@@ -25,7 +40,8 @@[m [mtry {[m
+ }[m
+ [m
+ const server = app.listen(PORT, () => {[m
+[31m-  console.log(`Backend running on http://localhost:${PORT}`)[m
+[32m+[m[32m  console.log(`Backend running on port ${PORT}`)[m
+[32m+[m[32m  console.log(`CORS allowed origins: ${allowedOrigins.join(', ')}`)[m
+ })[m
+ [m
+ server.on('error', (err: NodeJS.ErrnoException) => {[m
+[1mdiff --git a/frontend/.env.example b/frontend/.env.example[m
+[1mindex b18d3c6..491f64c 100644[m
+[1m--- a/frontend/.env.example[m
+[1m+++ b/frontend/.env.example[m
+[36m@@ -1,4 +1,16 @@[m
+ NEXT_PUBLIC_SUPABASE_URL=[m
+ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[m
+ NEXT_PUBLIC_SUPABASE_ANON_KEY=[m
+[32m+[m
+[32m+[m[32m# Production site URL (your Vercel domain) — required for Google OAuth redirects[m
+[32m+[m[32m# Example: https://kara.vercel.app[m
+[32m+[m[32mNEXT_PUBLIC_SITE_URL=[m
+[32m+[m
+[32m+[m[32m# Direct backend URL (optional in production if using BACKEND_URL proxy on Vercel)[m
+[32m+[m[32m# Do NOT use localhost in production builds[m
+[32m+[m[32m# Example: https://your-api.railway.app[m
+ NEXT_PUBLIC_API_URL=http://localhost:4000[m
+[32m+[m
+[32m+[m[32m# Server-only: backend URL for Next.js rewrites (set on Vercel, not exposed to browser)[m
+[32m+[m[32m# Example: https://your-api.railway.app[m
+[32m+[m[32m# BACKEND_URL=[m
+[1mdiff --git a/frontend/next.config.ts b/frontend/next.config.ts[m
+[1mindex a3620ca..0fc7f13 100644[m
+[1m--- a/frontend/next.config.ts[m
+[1m+++ b/frontend/next.config.ts[m
+[36m@@ -1,10 +1,24 @@[m
+ import type { NextConfig } from "next";[m
+ import path from "path";[m
+ [m
+[32m+[m[32mconst backendUrl =[m
+[32m+[m[32m  process.env.BACKEND_URL ||[m
+[32m+[m[32m  process.env.NEXT_PUBLIC_API_URL ||[m
+[32m+[m[32m  "http://localhost:4000";[m
+[32m+[m
+ const nextConfig: NextConfig = {[m
+   turbopack: {[m
+     root: path.join(__dirname, ".."),[m
+   },[m
+[32m+[m[32m  async rewrites() {[m
+[32m+[m[32m    const base = backendUrl.replace(/\/$/, "");[m
+[32m+[m[32m    return [[m
+[32m+[m[32m      {[m
+[32m+[m[32m        source: "/api/backend/:path*",[m
+[32m+[m[32m        destination: `${base}/api/:path*`,[m
+[32m+[m[32m      },[m
+[32m+[m[32m    ];[m
+[32m+[m[32m  },[m
+ };[m
+ [m
+ export default nextConfig;[m
+[1mdiff --git a/frontend/src/app/auth/page.tsx b/frontend/src/app/auth/page.tsx[m
+[1mindex 6111015..9afa368 100644[m
+[1m--- a/frontend/src/app/auth/page.tsx[m
+[1m+++ b/frontend/src/app/auth/page.tsx[m
+[36m@@ -3,6 +3,7 @@[m
+ import React, { useEffect, useState } from 'react'[m
+ import { supabase } from '@/lib/supabase'[m
+ import { checkOnboardingStatus } from '@/lib/onboarding'[m
+[32m+[m[32mimport { getSiteUrl } from '@/lib/config'[m
+ import { useRouter } from 'next/navigation'[m
+ [m
+ export default function AuthPage() {[m
+[36m@@ -35,10 +36,11 @@[m [mexport default function AuthPage() {[m
+   }, [router])[m
+ [m
+   const handleGoogleLogin = async () => {[m
+[32m+[m[32m    const siteUrl = getSiteUrl()[m
+     await supabase.auth.signInWithOAuth({[m
+       provider: 'google',[m
+       options: {[m
+[31m-        redirectTo: `${window.location.origin}/auth/callback`,[m
+[32m+[m[32m        redirectTo: `${siteUrl}/auth/callback`,[m
+       },[m
+     })[m
+   }[m
+[1mdiff --git a/frontend/src/lib/api.ts b/frontend/src/lib/api.ts[m
+[1mindex 712c50d..e5780e7 100644[m
+[1m--- a/frontend/src/lib/api.ts[m
+[1m+++ b/frontend/src/lib/api.ts[m
+[36m@@ -1,7 +1,6 @@[m
+[32m+[m[32mimport { apiUrl } from './config'[m
+ import { supabase } from './supabase'[m
+ [m
+[31m-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'[m
+[31m-[m
+ async function getAuthHeaders(): Promise<HeadersInit> {[m
+   const { data: { session } } = await supabase.auth.getSession()[m
+   if (!session?.access_token) {[m
+[36m@@ -15,7 +14,7 @@[m [masync function getAuthHeaders(): Promise<HeadersInit> {[m
+ [m
+ export async function getOnboardingStatus() {[m
+   const headers = await getAuthHeaders()[m
+[31m-  const res = await fetch(`${API_URL}/api/onboarding/status`, { headers })[m
+[32m+[m[32m  const res = await fetch(apiUrl('/api/onboarding/status'), { headers })[m
+   if (!res.ok) {[m
+     const body = await res.json().catch(() => ({}))[m
+     throw new Error(body.error ?? 'Failed to fetch onboarding status')[m
+[36m@@ -40,7 +39,7 @@[m [mexport async function submitOnboarding(data: {[m
+   liConnected: boolean[m
+ }) {[m
+   const headers = await getAuthHeaders()[m
+[31m-  const res = await fetch(`${API_URL}/api/onboarding/submit`, {[m
+[32m+[m[32m  const res = await fetch(apiUrl('/api/onboarding/submit'), {[m
+     method: 'POST',[m
+     headers,[m
+     body: JSON.stringify(data),[m
