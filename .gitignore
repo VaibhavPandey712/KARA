@@ -38,4 +38,3 @@ frontend/next-env.d.ts
 *.pem
 coverage/
 build/
-docs/

@@ -22,7 +22,7 @@ const SOCIAL = [
     icon: <Linkedin size={18} strokeWidth={1.8} />,
   },
   {
-    name: 'X', href: '#',
+    name: 'X', href: 'https://x.com/KARAforcreators',
     icon: (
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -81,7 +81,7 @@ export default function Footer() {
         <div className="footer__links-block">
           <p className="footer__links-title">Get In Touch</p>
           <ul className="footer__links-list">
-            <li><a href="mailto:hello@kara.ai" className="footer__link">hello@kara.ai</a></li>
+            <li><a href="mailto:hello@kara.ai" className="footer__link">karaoswithai@gmail.com</a></li>
             <li><a href="https://wa.me/" target="_blank" rel="noopener noreferrer" className="footer__link">WhatsApp Support</a></li>
             <li><a href="#contact" onClick={(e) => scrollTo('#contact', e)} className="footer__link">Book a Free Audit</a></li>
           </ul>
