@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Check, X, Zap, Star, Crown, ArrowRight, MessageCircle, ArrowLeft } from 'lucide-react'
+import type { User } from '@supabase/supabase-js'
 
 const PLANS = [
   {
@@ -91,7 +92,7 @@ const PLANS = [
 
 export default function PlansPage() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
   const [hoveredBtn, setHoveredBtn] = useState<string | null>(null)
   const [homeHovered, setHomeHovered] = useState(false)
@@ -199,7 +200,7 @@ export default function PlansPage() {
             letterSpacing: '-0.02em',
             margin: 0,
           }}>
-            You're out of free credits.{' '}
+            You&apos;re out of free credits.{' '}
             <span style={{ color: 'var(--color-accent)' }}>Upgrade to keep growing.</span>
           </h1>
 

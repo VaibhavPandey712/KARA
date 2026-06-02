@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { checkOnboardingStatus, submitAuditForm } from '@/lib/onboarding'
-import { ArrowRight, Phone, Mail, Instagram, Twitter, Linkedin, Youtube, Music } from 'lucide-react'
+import { ArrowRight, Mail, Instagram, Linkedin, Youtube } from 'lucide-react'
+import type { User } from '@supabase/supabase-js'
 const PLATFORMS = ['Instagram', 'YouTube', 'LinkedIn', 'X (Twitter)', 'Podcast', 'Multiple']
 const NICHES = ['Fitness', 'Fashion / Lifestyle', 'Gaming', 'Education', 'Tech', 'Finance', 'Food', 'Travel', 'Comedy / Entertainment', 'Beauty / Skincare', 'Business / Startup', 'Personal Brand', 'Other']
 const PROBLEMS = ['Low views', 'Not getting followers', 'No content ideas', 'Inconsistent posting', 'Poor editing quality', 'Weak captions / hooks', 'Low engagement', "Don't understand analytics", 'Not getting brand deals', 'Not sure what is wrong']
@@ -15,7 +16,7 @@ const TOTAL_STEPS = 9
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [step, setStep] = useState(0)
   const [visible, setVisible] = useState(true)
   const [slideDir, setSlideDir] = useState<'left' | 'right'>('left')
@@ -58,7 +59,7 @@ export default function OnboardingPage() {
       }
 
       try {
-        const { hasAudit } = await checkOnboardingStatus(user)
+        const { hasAudit } = await checkOnboardingStatus()
         if (cancelled) return
         if (hasAudit) {
           router.replace('/plans')
@@ -111,7 +112,7 @@ export default function OnboardingPage() {
         ...(form.helpOther.trim() ? [form.helpOther.trim()] : [])
       ]
 
-      await submitAuditForm(user.id, {
+      await submitAuditForm({
         name: form.name.trim(),
         platform: form.platform,
         profileLink: form.profileLink.trim(),
@@ -129,9 +130,9 @@ export default function OnboardingPage() {
       })
 
       router.push('/thank-you')
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Submit error:', err)
-      setError(err.message || 'Something went wrong. Please try again.')
+      setError((err as Error).message || 'Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -202,7 +203,7 @@ export default function OnboardingPage() {
       Hey {firstName}, welcome to <span style={{ color: 'var(--color-accent)' }}>KARA!</span>
     </h2>
     <p className="ob-sub">
-      Answer a few quick questions and we'll build your{' '}
+      Answer a few quick questions and we&apos;ll build your{' '}
       <strong style={{ color: 'var(--color-ink-2)' }}>free personalized creator audit.</strong>{' '}
       Takes under 2 minutes.
     </p>
@@ -215,7 +216,7 @@ export default function OnboardingPage() {
       ))}
     </div>
     <button className="ob-btn-primary ob-btn--full" style={{ marginTop: 'auto' }} onClick={goNext}>
-      Let's build my audit <ArrowRight size={16} strokeWidth={2} />
+      Let&apos;s build my audit <ArrowRight size={16} strokeWidth={2} />
     </button>
   </div>
 )}
@@ -224,7 +225,7 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div className="ob-step">
               <div className="ob-step-label">01 / {TOTAL_STEPS}</div>
-              <h2 className="ob-title">What's your name?</h2>
+              <h2 className="ob-title">What&apos;s your name?</h2>
               <p className="ob-sub">So we can personalize your audit.</p>
               <div className="ob-input-wrap">
                 <input className="ob-input" style={{ fontSize: '16px', padding: '14px 16px' }}
@@ -266,7 +267,7 @@ export default function OnboardingPage() {
             <div className="ob-step">
               <div className="ob-step-label">03 / {TOTAL_STEPS}</div>
               <h2 className="ob-title">Paste your profile link</h2>
-              <p className="ob-sub">We'll audit your actual profile.</p>
+              <p className="ob-sub">We&apos;ll audit your actual profile.</p>
               <div className="ob-input-wrap">
                 <input className="ob-input" style={{ fontSize: '16px', padding: '14px 16px' }}
                   placeholder={`Your ${form.platform || 'profile'} link or @username`}
@@ -286,7 +287,7 @@ export default function OnboardingPage() {
           {step === 4 && (
             <div className="ob-step">
               <div className="ob-step-label">04 / {TOTAL_STEPS}</div>
-              <h2 className="ob-title">What's your content niche?</h2>
+              <h2 className="ob-title">What&apos;s your content niche?</h2>
               <p className="ob-sub">What do you mainly create about?</p>
               <div className="ob-chips">
                 {NICHES.map(n => (
@@ -315,7 +316,7 @@ export default function OnboardingPage() {
           {step === 5 && (
             <div className="ob-step">
               <div className="ob-step-label">05 / {TOTAL_STEPS}</div>
-              <h2 className="ob-title">What's your biggest problem right now?</h2>
+              <h2 className="ob-title">What&apos;s your biggest problem right now?</h2>
               <p className="ob-sub">Select all that apply.</p>
               <div className="ob-chips">
                 {PROBLEMS.map(p => (
@@ -406,7 +407,7 @@ export default function OnboardingPage() {
             <div className="ob-step">
               <div className="ob-step-label">08 / {TOTAL_STEPS}</div>
               <h2 className="ob-title">Where should we send your audit?</h2>
-              <p className="ob-sub">We'll reach out within 24 hours.</p>
+              <p className="ob-sub">We&apos;ll reach out within 24 hours.</p>
              <div className="ob-contact-toggle">
   <button
     className={`ob-contact-tab ob-contact-tab--whatsapp ${form.contactType === 'whatsapp' ? 'ob-contact-tab--active' : ''}`}
@@ -449,7 +450,7 @@ export default function OnboardingPage() {
                 <span style={{ color: 'var(--color-ink-4)', fontWeight: 400, fontSize: '0.72em' }}>(optional)</span>
               </h2>
               <p className="ob-sub">
-                Give KARA access so we can run a deeper audit. You can skip this — we'll use your profile link instead.
+                Give KARA access so we can run a deeper audit. You can skip this — we&apos;ll use your profile link instead.
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

@@ -49,8 +49,8 @@ server.on('error', (err: NodeJS.ErrnoException) => {
     console.error(
       `\nPort ${PORT} is already in use.\n` +
         `Close the other backend terminal or run:\n` +
-        `  netstat -ano | findstr :${PORT}\n` +
-        `  taskkill /PID <pid> /F\n`
+        `  lsof -i :${PORT}\n` +
+        `  kill -9 <PID>\n`
     )
     process.exit(1)
   }
