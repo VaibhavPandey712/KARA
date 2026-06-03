@@ -14,38 +14,88 @@ function CallbackHandler() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const code = searchParams.get('code')
-    const oauthError = searchParams.get('error_description') || searchParams.get('error')
+    let cancelled = false
 
-    if (oauthError) {
-      console.error('OAuth error from redirect:', oauthError)
-      setError(oauthError)
-      setTimeout(() => router.replace('/auth'), 5000)
-      return
-    }
+    async function handleAuth() {
+      // 1. Check if we already have an active session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (cancelled) return
 
-    if (!code) {
-      router.replace('/auth')
-      return
-    }
-
-    async function handleCallback(code: string) {
-      try {
-        const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
-
-        if (sessionError) {
-          throw new Error(sessionError.message)
-        }
-
+      if (session) {
         router.replace('/onboarding')
-      } catch (err) {
-        console.error('Auth callback failed:', err)
-        setError('Authentication failed. Please try again.')
-        setTimeout(() => router.replace('/auth'), 2000)
+        return
       }
+
+      // 2. Check for error description or error in query parameters
+      const oauthError = searchParams.get('error_description') || searchParams.get('error')
+      if (oauthError) {
+        console.error('OAuth error from redirect:', oauthError)
+        setError(oauthError)
+        setTimeout(() => {
+          if (!cancelled) router.replace('/auth')
+        }, 5000)
+        return
+      }
+
+      // 3. Handle PKCE Flow (authorization code in query params)
+      const code = searchParams.get('code')
+      if (code) {
+        try {
+          const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
+          if (cancelled) return
+
+          if (sessionError) {
+            throw sessionError
+          }
+
+          router.replace('/onboarding')
+          return
+        } catch (err: any) {
+          console.error('Auth callback failed:', err)
+          setError(err.message || 'Authentication failed. Please try again.')
+          setTimeout(() => {
+            if (!cancelled) router.replace('/auth')
+          }, 5000)
+          return
+        }
+      }
+
+      // 4. Handle Implicit Flow (tokens in hash fragment e.g., #access_token=...)
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const hash = window.location.hash
+        if (hash.includes('access_token=') || hash.includes('error=')) {
+          // Listen to the auth state change; Supabase client automatically processes the hash fragment
+          const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+              subscription.unsubscribe()
+              router.replace('/onboarding')
+            }
+          })
+
+          // Fallback timeout in case the hash fragment processing fails or hangs
+          setTimeout(() => {
+            subscription.unsubscribe()
+            supabase.auth.getSession().then(({ data: { session } }) => {
+              if (session) {
+                router.replace('/onboarding')
+              } else {
+                router.replace('/auth')
+              }
+            })
+          }, 5000)
+          return
+        }
+      }
+
+      // 5. No code, no hash fragment, no session -> redirect to /auth
+      router.replace('/auth')
     }
 
-    handleCallback(code)
+    handleAuth()
+
+    return () => {
+      cancelled = true
+    }
   }, [router, searchParams])
 
   if (error) {
