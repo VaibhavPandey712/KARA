@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { checkOnboardingStatus } from '@/lib/onboarding'
+import { getOnboardingStatus } from '@/lib/api'
 import { getSiteUrl } from '@/lib/config'
 import { useRouter } from 'next/navigation'
 
@@ -34,7 +34,7 @@ export default function AuthPage() {
       }
 
       try {
-        const { hasAudit } = await checkOnboardingStatus()
+        const { hasAudit } = await getOnboardingStatus()
         if (cancelled) return
         router.replace(hasAudit ? '/plans' : '/onboarding')
       } catch {

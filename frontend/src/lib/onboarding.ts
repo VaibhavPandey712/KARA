@@ -1,33 +1,13 @@
 import { supabase } from './supabase'
-import { getOnboardingStatus, submitOnboarding } from './api'
+import { getOnboardingStatus } from './api'
 import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
-export type AuditFormData = {
-  name: string
-  platform: string
-  profileLink: string
-  niche: string
-  problems: string[]
-  goals: string[]
-  helpNeeded: string[]
-  contact: string
-  contactType: string
-  specificNote: string
-  igConnected: boolean
-  ytConnected: boolean
-  ttConnected: boolean
-  liConnected: boolean
-}
-
-export async function checkOnboardingStatus(): Promise<{ hasAudit: boolean }> {
-  const result = await getOnboardingStatus()
-  return { hasAudit: result.hasAudit }
-}
-
-export async function submitAuditForm(data: AuditFormData) {
-  await submitOnboarding(data)
-}
-
+/**
+ * Handles the "Get Free Audit" button click across the app.
+ * - If not signed in → redirect to /auth
+ * - If already submitted an audit → redirect to /plans
+ * - Otherwise → redirect to /onboarding
+ */
 export async function handleAuditClick(router: AppRouterInstance) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.user) {
@@ -35,6 +15,6 @@ export async function handleAuditClick(router: AppRouterInstance) {
     return
   }
 
-  const { hasAudit } = await checkOnboardingStatus()
+  const { hasAudit } = await getOnboardingStatus()
   router.push(hasAudit ? '/plans' : '/onboarding')
 }

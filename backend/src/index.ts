@@ -1,6 +1,7 @@
 import './env'
 import express from 'express'
 import cors from 'cors'
+import authRoutes from './routes/auth'
 import onboardingRoutes from './routes/onboarding'
 import { validateEnv } from './lib/supabase'
 
@@ -30,6 +31,7 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })
 })
 
+app.use('/api/auth', authRoutes)
 app.use('/api/onboarding', onboardingRoutes)
 
 try {

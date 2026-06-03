@@ -3,7 +3,7 @@ import { FaXTwitter } from "react-icons/fa6";
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { checkOnboardingStatus, submitAuditForm } from '@/lib/onboarding'
+import { getOnboardingStatus, submitOnboarding } from '@/lib/api'
 import { ArrowRight, Mail, Instagram, Linkedin, Youtube } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 const PLATFORMS = ['Instagram', 'YouTube', 'LinkedIn', 'X (Twitter)', 'Podcast', 'Multiple']
@@ -59,7 +59,7 @@ export default function OnboardingPage() {
       }
 
       try {
-        const { hasAudit } = await checkOnboardingStatus()
+        const { hasAudit } = await getOnboardingStatus()
         if (cancelled) return
         if (hasAudit) {
           router.replace('/plans')
@@ -112,7 +112,7 @@ export default function OnboardingPage() {
         ...(form.helpOther.trim() ? [form.helpOther.trim()] : [])
       ]
 
-      await submitAuditForm({
+      await submitOnboarding({
         name: form.name.trim(),
         platform: form.platform,
         profileLink: form.profileLink.trim(),

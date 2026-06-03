@@ -1,6 +1,8 @@
 import { apiUrl } from './config'
 import { supabase } from './supabase'
 
+// ── Helpers ──────────────────────────────────────────────────────────
+
 async function getAuthHeaders(): Promise<HeadersInit> {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session?.access_token) {
@@ -12,17 +14,34 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   }
 }
 
-export async function getOnboardingStatus() {
+// ── Auth ─────────────────────────────────────────────────────────────
+
+/** Exchange an OAuth authorization code for session tokens via the backend */
+export async function exchangeOAuthCode(code: string): Promise<{
+  access_token: string
+  refresh_token: string
+}> {
+  const res = await fetch(apiUrl(`/api/auth/callback?code=${encodeURIComponent(code)}`))
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new Error(body.error ?? 'OAuth code exchange failed')
+  }
+  return body
+}
+
+// ── Onboarding ───────────────────────────────────────────────────────
+
+export async function getOnboardingStatus(): Promise<{ hasAudit: boolean; user: unknown }> {
   const headers = await getAuthHeaders()
   const res = await fetch(apiUrl('/api/onboarding/status'), { headers })
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
     throw new Error(body.error ?? 'Failed to fetch onboarding status')
   }
-  return res.json() as Promise<{ hasAudit: boolean; user: unknown }>
+  return res.json()
 }
 
-export async function submitOnboarding(data: {
+export interface AuditFormData {
   name: string
   platform: string
   profileLink: string
@@ -37,7 +56,9 @@ export async function submitOnboarding(data: {
   ytConnected: boolean
   ttConnected: boolean
   liConnected: boolean
-}) {
+}
+
+export async function submitOnboarding(data: AuditFormData) {
   const headers = await getAuthHeaders()
   const res = await fetch(apiUrl('/api/onboarding/submit'), {
     method: 'POST',
