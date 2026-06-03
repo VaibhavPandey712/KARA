@@ -4,6 +4,7 @@ import cors from 'cors'
 import authRoutes from './routes/auth'
 import onboardingRoutes from './routes/onboarding'
 import collabRoutes from './routes/collab'
+import adminRoutes from './routes/admin'
 import { validateEnv } from './lib/supabase'
 
 const app = express()
@@ -35,6 +36,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/onboarding', onboardingRoutes)
 app.use('/api/collab', collabRoutes)
+app.use('/api/admin', adminRoutes)
 
 try {
   validateEnv()
