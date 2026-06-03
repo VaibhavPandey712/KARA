@@ -15,6 +15,14 @@ function CallbackHandler() {
 
   useEffect(() => {
     const code = searchParams.get('code')
+    const oauthError = searchParams.get('error_description') || searchParams.get('error')
+
+    if (oauthError) {
+      console.error('OAuth error from redirect:', oauthError)
+      setError(oauthError)
+      setTimeout(() => router.replace('/auth'), 5000)
+      return
+    }
 
     if (!code) {
       router.replace('/auth')
