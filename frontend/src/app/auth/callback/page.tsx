@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { exchangeOAuthCode } from '@/lib/api'
 
 /**
  * Inner component that reads search params and handles the OAuth callback.
@@ -24,12 +23,7 @@ function CallbackHandler() {
 
     async function handleCallback(code: string) {
       try {
-        const { access_token, refresh_token } = await exchangeOAuthCode(code)
-
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        })
+        const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code)
 
         if (sessionError) {
           throw new Error(sessionError.message)
