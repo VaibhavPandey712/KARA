@@ -1,10 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Zap, Sparkles, Bot, ArrowRightCircle } from 'lucide-react'
+import { Zap, Sparkles, Bot, ArrowRightCircle, Handshake } from 'lucide-react'
 import { handleAuditClick as goToAudit } from '@/lib/onboarding'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+import BrandCollabForm from './BrandCollabForm'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
@@ -21,8 +23,18 @@ const fadeUp = {
 
 export default function Hero() {
   const router = useRouter()
+  const [showCollabForm, setShowCollabForm] = useState(false)
 
   const handleAuditClick = () => goToAudit(router)
+
+  const handleCollabClick = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.user) {
+      router.push('/auth')
+      return
+    }
+    setShowCollabForm(true)
+  }
 
   return (
     <div className="hero" id="home">
@@ -67,22 +79,32 @@ export default function Hero() {
             platforms automatically. Create once, AI handles the rest.
           </motion.p>
 
-          {/* CTA */}
-          <motion.button
-            className="hero__cta"
+          {/* CTA Group */}
+          <motion.div
+            className="hero__cta-group"
             variants={fadeUp}
             initial="hidden"
             animate="visible"
             custom={2}
-            onClick={handleAuditClick}
-            whileHover={{ scale: 1.04, filter: 'brightness(1.1)' }}
-            whileTap={{ scale: 0.96 }}
           >
-            <span>Book a Free Creator Audit</span>
-            <ArrowRightCircle className="hero__cta-icon" size={20} />
-          </motion.button>
+            <button className="hero__cta" onClick={handleAuditClick}>
+              <span>Book a Free Creator Audit</span>
+              <ArrowRightCircle className="hero__cta-icon" size={20} />
+            </button>
+
+            <button className="hero__cta-secondary" onClick={handleCollabClick}>
+              <Handshake size={18} strokeWidth={1.8} />
+              <span>Get Brand Collaborations</span>
+            </button>
+          </motion.div>
         </div>
       </div>
+
+      {/* Brand Collab Modal */}
+      <BrandCollabForm
+        isOpen={showCollabForm}
+        onClose={() => setShowCollabForm(false)}
+      />
     </div>
   )
 }

@@ -71,3 +71,28 @@ export async function submitOnboarding(data: AuditFormData) {
   }
   return body
 }
+
+// ── Brand Collaborations ─────────────────────────────────────────
+
+export interface BrandCollabFormData {
+  brandTypes: string[]
+  collabTypes: string[]
+  promoteUnused: string
+  contactDetail: string
+  dreamBrands: string
+}
+
+export async function submitBrandCollab(data: BrandCollabFormData) {
+  const headers = await getAuthHeaders()
+  const res = await fetch(apiUrl('/api/collab/submit'), {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data),
+  })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    throw new Error(body.error ?? 'Failed to submit collaboration request')
+  }
+  return body
+}
+
