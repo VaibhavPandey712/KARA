@@ -5,6 +5,12 @@ import { getDbClient } from '../lib/supabase'
 
 const router = Router()
 
+/* ── Admin Check ──────────────────────────────── */
+
+router.get('/check', requireAdmin, (req: AuthRequest, res: Response) => {
+  res.json({ isAdmin: true })
+})
+
 /* ── Dashboard Stats ──────────────────────────── */
 
 router.get('/stats', requireAdmin, async (req: AuthRequest, res: Response) => {

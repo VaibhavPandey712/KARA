@@ -177,3 +177,17 @@ export async function updateCollabStatus(id: string, status: 'pending' | 'in-pro
   }
   return body
 }
+
+export async function checkIsAdmin(): Promise<boolean> {
+  try {
+    const headers = await getAuthHeaders()
+    const res = await fetch(apiUrl('/api/admin/check'), { headers })
+    if (res.status === 401 || res.status === 403) {
+      return false
+    }
+    const body = await res.json().catch(() => ({}))
+    return !!body.isAdmin
+  } catch (err) {
+    return false
+  }
+}

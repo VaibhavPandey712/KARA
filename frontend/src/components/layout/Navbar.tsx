@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X, LogOut, Shield } from 'lucide-react'
 import { handleAuditClick as goToAudit } from '@/lib/onboarding'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { checkIsAdmin } from '@/lib/api'
 
 const NAV_LINKS = [
   { label: 'Home',         href: '#home' },
@@ -33,6 +34,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -50,11 +52,23 @@ export default function Navbar() {
   useEffect(() => {
     // Get current session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      if (currentUser) {
+        checkIsAdmin().then(setIsAdmin)
+      } else {
+        setIsAdmin(false)
+      }
     })
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const currentUser = session?.user ?? null
+      setUser(currentUser)
+      if (currentUser) {
+        checkIsAdmin().then(setIsAdmin)
+      } else {
+        setIsAdmin(false)
+      }
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -114,6 +128,12 @@ export default function Navbar() {
 
           {/* Desktop actions */}
           <div className="navbar__actions">
+            {isAdmin && (
+              <button className="navbar__btn-secondary" onClick={() => router.push('/admin')}>
+                <Shield size={14} strokeWidth={2} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} />
+                Admin Panel
+              </button>
+            )}
             <button className="navbar__btn-primary" onClick={handleAuthClick}>
               Get Free Audit
             </button>
@@ -157,6 +177,16 @@ export default function Navbar() {
                       </div>
 
                       <div className="nav-dropdown__divider" />
+
+                      {isAdmin && (
+                        <>
+                          <button className="nav-dropdown__admin" onClick={() => { setDropdownOpen(false); router.push('/admin'); }}>
+                            <Shield size={14} strokeWidth={2} />
+                            Admin Panel
+                          </button>
+                          <div className="nav-dropdown__divider" />
+                        </>
+                      )}
 
                       {/* Sign out */}
                       <button className="nav-dropdown__signout" onClick={handleSignOut}>
@@ -230,6 +260,12 @@ export default function Navbar() {
               </nav>
 
               <div className="mobile-sheet__actions">
+                {isAdmin && (
+                  <button className="mobile-sheet__btn-admin" onClick={() => { setMenuOpen(false); router.push('/admin'); }}>
+                    <Shield size={15} strokeWidth={2} />
+                    Admin Panel
+                  </button>
+                )}
                 <button className="mobile-sheet__btn-primary" onClick={handleAuthClick}>
                   Get Free Audit
                 </button>
